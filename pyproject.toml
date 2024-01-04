@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "job-parser"
+version = "0.1.0"
+description = "Программа, которая получает информацию о вакансиях с разных платформ в России."
+authors = ["Vladimir-Bolotov <moru4ok.89@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
