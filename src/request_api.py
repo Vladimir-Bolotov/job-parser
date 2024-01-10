@@ -31,8 +31,17 @@ class SuperJobAPI(WebsiteVacanciesAPI):
     def __init__(self, keyword: str, payment_from: int = None, experience: int = None, no_agreement: int = 1):
         self.keyword = keyword
         self.payment_from = payment_from
-        self.experience = experience
         self.no_agreement = no_agreement
+
+        if experience == 0:
+            self.experience = 1
+        elif 1 < experience < 3:
+            self.experience = 2
+        elif 3 <= experience < 6:
+            self.experience = 3
+        else:
+            self.experience = 4
+
         self.url = 'https://api.superjob.ru/2.0/vacancies/'
 
     def search_vacancies(self):
@@ -62,11 +71,20 @@ class SuperJobAPI(WebsiteVacanciesAPI):
 class HeadHunterAPI(WebsiteVacanciesAPI):
     """Класс для работы с API api.hh.ru"""
 
-    def __init__(self, text: str, salary: int = None, experience: str = None, only_with_salary=True):
+    def __init__(self, text: str, salary: int = None, only_with_salary=True, experience: int = None):
         self.text = text
         self.salary = salary
-        self.experience = experience
         self.only_with_salary = only_with_salary
+
+        if experience == 0:
+            self.experience = 'noExperience'
+        elif 0 < experience < 3:
+            self.experience = 'between1And3'
+        elif 3 <= experience < 6:
+            self.experience = 'between3And6'
+        else:
+            self.experience = 'moreThan6'
+
         self.url = 'https://api.hh.ru/vacancies'
 
     def search_vacancies(self):
