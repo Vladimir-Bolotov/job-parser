@@ -15,6 +15,15 @@ class WebsiteVacanciesAPI(ABC):
         """
         pass
 
+    @abstractmethod
+    def processing_vacancies(self, vacancies):
+        """
+        Достает из словаря с вакансиями необходимые параметры
+        :param vacancies: словарь с вакансиями
+        :return: список вакансий с необходимыми параметрами
+        """
+        pass
+
 
 class SuperJobAPI(WebsiteVacanciesAPI):
     """Класс для работы с API api.superjob.ru"""
@@ -36,9 +45,23 @@ class SuperJobAPI(WebsiteVacanciesAPI):
 
         return response.json()
 
+    def processing_vacancies(self, vacancies):
+        list_vacancies = list()
+        for vacancy in vacancies['objects']:
+            job_data = {
+                'profession': vacancy['profession'],
+                'experience': vacancy['experience']['title'],
+                'salary_from': vacancy['payment_from'],
+                'salary_to': vacancy['payment_to'],
+                'link': vacancy['link'],
+                'description': vacancy['candidat']}
+            list_vacancies.append(job_data)
+        return list_vacancies
+
 
 class HeadHunterAPI(WebsiteVacanciesAPI):
     """Класс для работы с API api.hh.ru"""
+
     def __init__(self, text: str, salary: int = None, experience: str = None, only_with_salary=True):
         self.text = text
         self.salary = salary
@@ -55,3 +78,16 @@ class HeadHunterAPI(WebsiteVacanciesAPI):
         response = requests.get(self.url, params=params)
 
         return response.json()
+
+    def processing_vacancies(self, vacancies):
+        list_vacancies = list()
+        for vacancy in vacancies['items']:
+            job_data = {
+                'profession': vacancy['name'],
+                'experience': vacancy['experience']['name'],
+                'salary_from': vacancy['salary']['from'],
+                'salary_to': vacancy['salary']['to'],
+                'link': vacancy['alternate_url'],
+                'description': vacancy['snippet']['responsibility']}
+            list_vacancies.append(job_data)
+        return list_vacancies
