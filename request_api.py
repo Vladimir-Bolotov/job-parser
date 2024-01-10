@@ -1,4 +1,3 @@
-
 import os
 from abc import ABC, abstractmethod
 
@@ -10,30 +9,49 @@ SUPERJOB_API_KEY = os.environ.get('SUPERJOB_API_KEY')
 class WebsiteVacanciesAPI(ABC):
     @abstractmethod
     def search_vacancies(self):
+        """
+        Отправляет API запрос с указанными параметрами
+        :return: возвращает словарь с вакансиями
+        """
         pass
 
 
 class SuperJobAPI(WebsiteVacanciesAPI):
+    """Класс для работы с API api.superjob.ru"""
 
-    def __init__(self, keyword: str = None, town: str = None, payment_from: int = 0,
-                 payment_to: int = 0, vacancies_count: int = 0, experience: int = None):
+    def __init__(self, keyword: str, payment_from: int = None, experience: int = None, no_agreement: int = 1):
         self.keyword = keyword
-        self.town = town
         self.payment_from = payment_from
-        self.payment_to = payment_to
-        self.vacancies_count = vacancies_count
         self.experience = experience
-        self.url = 'https://api.superjob.ru/2.0/'
+        self.no_agreement = no_agreement
+        self.url = 'https://api.superjob.ru/2.0/vacancies/'
 
     def search_vacancies(self):
         headers = {'X-Api-App-Id': SUPERJOB_API_KEY}
         params = {'keyword': self.keyword,
                   'payment_from': self.payment_from,
-                  'payment_to': self.payment_to,
-                  'town': self.town,
-                  'count': self.vacancies_count,
-                  'experience': self.experience}
+                  'experience': self.experience,
+                  'no_agreement': self.no_agreement}
+        response = requests.get(self.url, params=params, headers=headers)
 
-        response = requests.get(self.url + 'vacancies/', params=params, headers=headers)
+        return response.json()
 
-        return response
+
+class HeadHunterAPI(WebsiteVacanciesAPI):
+    """Класс для работы с API api.hh.ru"""
+    def __init__(self, text: str, salary: int = None, experience: str = None, only_with_salary=True):
+        self.text = text
+        self.salary = salary
+        self.experience = experience
+        self.only_with_salary = only_with_salary
+        self.url = 'https://api.hh.ru/vacancies'
+
+    def search_vacancies(self):
+        params = {'text': self.text,
+                  'salary': self.salary,
+                  'experience': self.experience,
+                  'only_with_salary': self.only_with_salary
+                  }
+        response = requests.get(self.url, params=params)
+
+        return response.json()
