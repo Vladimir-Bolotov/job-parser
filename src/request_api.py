@@ -28,10 +28,11 @@ class WebsiteVacanciesAPI(ABC):
 class SuperJobAPI(WebsiteVacanciesAPI):
     """Класс для работы с API api.superjob.ru"""
 
-    def __init__(self, keyword: str, payment_from: int = None, experience: int = None, no_agreement: int = 1):
+    def __init__(self, keyword: str, payment_from: int, experience: int, no_agreement: int):
         self.keyword = keyword
         self.payment_from = payment_from
         self.no_agreement = no_agreement
+        self.count = 100
 
         if experience == 0:
             self.experience = 1
@@ -49,7 +50,8 @@ class SuperJobAPI(WebsiteVacanciesAPI):
         params = {'keyword': self.keyword,
                   'payment_from': self.payment_from,
                   'experience': self.experience,
-                  'no_agreement': self.no_agreement}
+                  'no_agreement': self.no_agreement,
+                  'count': self.count}
         response = requests.get(self.url, params=params, headers=headers)
 
         return response.json()
@@ -71,10 +73,11 @@ class SuperJobAPI(WebsiteVacanciesAPI):
 class HeadHunterAPI(WebsiteVacanciesAPI):
     """Класс для работы с API api.hh.ru"""
 
-    def __init__(self, text: str, salary: int = None, only_with_salary=True, experience: int = None):
+    def __init__(self, text: str, salary: int, experience: int, only_with_salary):
         self.text = text
         self.salary = salary
         self.only_with_salary = only_with_salary
+        self.per_page = 100
 
         if experience == 0:
             self.experience = 'noExperience'
@@ -91,7 +94,8 @@ class HeadHunterAPI(WebsiteVacanciesAPI):
         params = {'text': self.text,
                   'salary': self.salary,
                   'experience': self.experience,
-                  'only_with_salary': self.only_with_salary
+                  'only_with_salary': self.only_with_salary,
+                  'per_page': self.per_page
                   }
         response = requests.get(self.url, params=params)
 
@@ -99,13 +103,18 @@ class HeadHunterAPI(WebsiteVacanciesAPI):
 
     def processing_vacancies(self, vacancies):
         list_vacancies = list()
+
         for vacancy in vacancies['items']:
-            job_data = {
-                'profession': vacancy['name'],
-                'experience': vacancy['experience']['name'],
-                'salary_from': vacancy['salary']['from'],
-                'salary_to': vacancy['salary']['to'],
-                'link': vacancy['alternate_url'],
-                'description': vacancy['snippet']['responsibility']}
-            list_vacancies.append(job_data)
+            try:
+                job_data = {
+                    'profession': vacancy['name'],
+                    'experience': vacancy['experience']['name'],
+                    'salary_from': vacancy['salary']['from'],
+                    'salary_to': vacancy['salary']['to'],
+                    'link': vacancy['alternate_url'],
+                    'description': vacancy['snippet']['responsibility']}
+                list_vacancies.append(job_data)
+            except TypeError:
+                continue
         return list_vacancies
+        
